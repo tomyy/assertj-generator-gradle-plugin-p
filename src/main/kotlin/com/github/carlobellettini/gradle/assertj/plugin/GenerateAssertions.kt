@@ -24,12 +24,11 @@ import java.net.URLClassLoader
 
 open class GenerateAssertions : DefaultTask(), ProjectEvaluationListener {
 
-    @get:Internal
     private val extension: AssertjGeneratorExtension by lazy {
         project.extensions.getByType(AssertjGeneratorExtension::class.java)
     }
 
-    private val classPath: FileCollection
+    val classPath: FileCollection
         @InputFiles
         @CompileClasspath
         get() = sourceSet!!.runtimeClasspath
@@ -40,7 +39,7 @@ open class GenerateAssertions : DefaultTask(), ProjectEvaluationListener {
         @Internal
         get() = field ?: extension.entryPointTypes
 
-    private val entryPointTypesAsSet
+    val entryPointTypesAsSet
         @Input
         get() = entryPointTypes!!.toSet()
     /**
@@ -48,10 +47,10 @@ open class GenerateAssertions : DefaultTask(), ProjectEvaluationListener {
      * Any type accepted by Project.file(Object).
      */
     var outputDir: Any? = null
-        @Input
+        @Internal
         get() = field ?: extension.outputDir ?: "src/${testSourceSet!!.name}/generated-java"
 
-    private val resolvedOutputDir: File
+    val resolvedOutputDir: File
         @OutputDirectory
         get() = project.file(outputDir!!)
 
@@ -59,12 +58,14 @@ open class GenerateAssertions : DefaultTask(), ProjectEvaluationListener {
      * The sourceSet containing classes to generate assertions for.
      */
     var sourceSet: SourceSet? = null
+        @Internal
         get() = field ?: extension.sourceSet
 
     /**
      * The target sourceSet for generated assertions.
      */
     var testSourceSet: SourceSet? = null
+        @Internal
         get() = field ?: extension.testSourceSet
 
     /**
@@ -119,7 +120,8 @@ open class GenerateAssertions : DefaultTask(), ProjectEvaluationListener {
         }
 
         val fileName = "${entryPointType.name.toLowerCase()}_assertions_entry_point_class.txt"
-        val templateContent = this.javaClass.classLoader.getResource(fileName).readText()
+        val templateContent = this.javaClass.classLoader.getResource(fileName)?.readText()
+            ?: throw RuntimeException("Error locating resource $fileName!")
         return Template(templateType, templateContent)
     }
 
@@ -128,8 +130,8 @@ open class GenerateAssertions : DefaultTask(), ProjectEvaluationListener {
             val sourceClassesTaskName = sourceSet!!.classesTaskName
             dependsOn.add(sourceClassesTaskName)
             testSourceSet!!.java.srcDir(resolvedOutputDir)
-            listOf("java", "kotlin", "groovy").forEach {
-                project.getTasksByName(testSourceSet!!.getCompileTaskName(it), false).forEach {
+            listOf("java", "kotlin", "groovy").forEach { lang ->
+                project.getTasksByName(testSourceSet!!.getCompileTaskName(lang), false).forEach {
                     it.dependsOn(this)
                 }
             }
@@ -138,7 +140,7 @@ open class GenerateAssertions : DefaultTask(), ProjectEvaluationListener {
         }
     }
 
-    override fun beforeEvaluate(project: Project?) {
+    override fun beforeEvaluate(project: Project) {
     }
 
     @TaskAction
@@ -169,7 +171,9 @@ open class GenerateAssertions : DefaultTask(), ProjectEvaluationListener {
                     assertionGenerator.generateAssertionsEntryPointClassFor(classDescriptions, it, entryPointPackage)
                 }.toSet()
 
-        logger.lifecycle("Generated ${generatedAssertions.size} assertion classes, " +
-            "${entryPoints.size} entry point classes in $resolvedOutputDir")
+        logger.lifecycle(
+            "Generated ${generatedAssertions.size} assertion classes, " +
+                "${entryPoints.size} entry point classes in $resolvedOutputDir"
+        )
     }
 }
