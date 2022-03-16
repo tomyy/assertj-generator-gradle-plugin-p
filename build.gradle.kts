@@ -5,7 +5,7 @@ plugins {
     id("org.jmailen.kotlinter") version "3.6.0"
 }
 
-group = "com.github.carlobellettini"
+group = "io.github.carlobellettini"
 version = "2.0"
 
 repositories {
@@ -21,7 +21,7 @@ dependencies {
 gradlePlugin {
     plugins {
         create("assertjGenerator") {
-            id = "com.github.carlobellettini.assertj-generator-p"
+            id = "io.github.carlobellettini.assertj-generator-p"
             implementationClass = "com.github.carlobellettini.gradle.assertj.plugin.AssertjGeneratorPlugin"
         }
     }
