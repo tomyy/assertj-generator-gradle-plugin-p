@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.carlobellettini"
-version = "2.0"
+version = "2.0.1"
 
 repositories {
     mavenCentral()
@@ -22,7 +22,7 @@ gradlePlugin {
     plugins {
         create("assertjGenerator") {
             id = "io.github.carlobellettini.assertj-generator-p"
-            implementationClass = "com.github.carlobellettini.gradle.assertj.plugin.AssertjGeneratorPlugin"
+            implementationClass = "io.github.carlobellettini.gradle.assertj.plugin.AssertjGeneratorPlugin"
         }
     }
 }

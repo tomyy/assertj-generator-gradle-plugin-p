@@ -1,4 +1,4 @@
-package com.github.carlobellettini.gradle.assertj.plugin
+package io.github.carlobellettini.gradle.assertj.plugin
 
 import org.assertj.assertions.generator.AssertionsEntryPointType
 import org.assertj.assertions.generator.BaseAssertionGenerator
